@@ -113,20 +113,32 @@ while True:
         # https://developer.webex.com/docs/basics for more detail
 
         if command == "showrun" and responseMessage == 'ok':
-            filename = "./backups/show_run_66070108_CSR1Kv.txt"
-            fileobject = open(filename, "rb")
-            filetype = "text/plain"
-            postData = {
-                "roomId": roomIdToGetMessages,
-                "text": "show running config",
-                "files": ("show_run_66070108_CSR1Kv.txt", fileobject, filetype),
-            }
-            postData = MultipartEncoder(postData)
+            filename = "./backups/show_run_66070108_CSR1kv.txt"
 
-            HTTPHeaders = {
-                "Authorization": f"Bearer {ACCESS_TOKEN}",
-                "Content-Type": "application/json",
-            }
+            with open(filename, "rb") as fileobject:
+                postData = MultipartEncoder(
+                    fields={
+                        "roomId": roomIdToGetMessages,
+                        "text": "show running config",
+                        "files": ("show_run_66070108_CSR1kv.txt", fileobject, "text/plain"),
+                    }
+                )
+
+                HTTPHeaders = {
+                    "Authorization": f"Bearer {ACCESS_TOKEN}",
+                    "Content-Type": postData.content_type,
+                }
+
+                r = requests.post(
+                    "https://webexapis.com/v1/messages",
+                    data=postData,
+                    headers=HTTPHeaders,
+                )
+
+                if not r.status_code == 200:
+                    raise Exception(
+                        f"Incorrect reply from Webex Teams API. Status code: {r.status_code}"
+                    )
         # other commands only send text, or no attached file.
         else:
             postData = {"roomId": roomIdToGetMessages, "text": responseMessage}
@@ -136,14 +148,14 @@ while True:
             HTTPHeaders = {"Authorization": f"Bearer {ACCESS_TOKEN}",
                            "Content-Type": "application/json"}
 
-        # Post the call to the Webex Teams message API.
-        r = requests.post(
-            "https://webexapis.com/v1/messages",
-            data=postData,
-            headers=HTTPHeaders,
-        )
-        if not r.status_code == 200:
-            raise Exception(
-                "Incorrect reply from Webex Teams API. Status code: {}".format(
-                    r.status_code)
+            # Post the call to the Webex Teams message API.
+            r = requests.post(
+                "https://webexapis.com/v1/messages",
+                data=postData,
+                headers=HTTPHeaders,
             )
+            if not r.status_code == 200:
+                raise Exception(
+                    "Incorrect reply from Webex Teams API. Status code: {}".format(
+                        r.status_code)
+                )
