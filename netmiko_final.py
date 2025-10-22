@@ -1,15 +1,20 @@
 from netmiko import ConnectHandler
 from pprint import pprint
+import os
+from dotenv import load_dotenv
 
-device_ip = "<!!!REPLACEME with router IP address!!!>"
-username = "admin"
-password = "cisco"
+
+load_dotenv()
+
+router_ip = os.getenv("ROUTER_IP")
 
 device_params = {
-    "device_type": "<!!!REPLACEME with device type for netmiko!!!>",
-    "ip": device_ip,
-    "username": username,
-    "password": password,
+    "device_type": "cisco_ios",
+    "ip": router_ip,
+    "username": "admin",
+    "password": "cisco",
+    "conn_timeout": 20,
+    "banner_timeout": 30
 }
 
 
@@ -19,16 +24,20 @@ def gigabit_status():
         up = 0
         down = 0
         admin_down = 0
-        result = ssh.send_command("<!!!REPLACEME with proper command!!!>", use_textfsm=True)
+        result = ssh.send_command("show ip interface brief", use_textfsm=True)
         for status in result:
-            if <!!!Write code here!!!>:
-                <!!!Write code here!!!>
-                if <!!!Write code here!!!> == "up":
+            if "GigabitEthernet" in status['interface']:
+                admin_stace = status['status'].lower()
+                ans += f"{status['interface']} {admin_stace}, "
+
+                if admin_stace == "up":
                     up += 1
-                elif <!!!Write code here!!!> == "down":
+                elif admin_stace == "down":
                     down += 1
-                elif <!!!Write code here!!!> == "administratively down":
+                elif admin_stace == "administratively down":
                     admin_down += 1
-        ans = <!!!Write code here!!!>
+
+        ans = f"{ans[:-2]} -> {up} up, {down} down, {admin_down} administratively down"
+
         pprint(ans)
         return ans
