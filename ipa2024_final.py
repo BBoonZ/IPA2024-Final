@@ -73,11 +73,24 @@ while True:
 
     # check if the text of the message starts with the magic character "/" followed by your studentID and a space and followed by a command name
     #  e.g.  "/66070123 create"
+    # /66070123 10.0.15.61 create
+    api = None
+
     if message.startswith("/66070108 "):
 
         # extract the command
-        command = message.split(" ")[1].lower()
-        print(command)
+        message_len = len(message.split(" "))
+
+        if message_len >= 3:
+            router_ip, command = messages.split(" ")[1].lower(), messages.split(" ")[2].lower()
+            print(router_ip, command)
+        elif message_len == 2 & (messages.split(" ")[1].lower() == "restconf" or  messages.split(" ")[1].lower() == "netconf"):
+            api = messages.split(" ")[1].lower()
+            responseMessage == f"Ok: {messages.split(' ')}"
+        elif message_len == 2 
+        elif message_len == 2 & messages.startswith("/66070108 10.0.15"):
+            responseMessage == "Error: No command found."
+
 
 # 5. Complete the logic for each command
 
